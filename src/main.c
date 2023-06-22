@@ -24,6 +24,8 @@ int main(void)
     SetTargetFPS(60);
 
     while(!WindowShouldClose()) {
+        grid = grid_cleanup(grid);
+
         ClearBackground(BLACK);
         BeginDrawing();
             grid_draw(grid);

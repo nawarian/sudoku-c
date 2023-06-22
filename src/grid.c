@@ -32,7 +32,7 @@ void grid_set(grid_t *grid, int x, int y, uint8_t number)
     }
 }
 
-void grid_copy_cell(grid_t grid, cell_t *dst, int x, int y)
+void grid_cell_copy(grid_t grid, cell_t *dst, int x, int y)
 {
     memcpy(dst, &grid.col[x][y], sizeof(cell_t));
 }
@@ -58,7 +58,37 @@ grid_t grid_load(char matrix[9*9])
         grid_set(&grid, x, y, val > 0 ? val : 0);
     }
 
-    return grid;
+    return grid_cleanup(grid);
+}
+
+
+void grid_cell_remove_possibility(grid_t *grid, int x, int y, uint8_t val)
+{
+    for (int i = 0; i < 9; ++i) {
+        if (i != y) {
+            grid->row[i][x][val] = 0;
+            grid->col[x][i][val] = 0;
+        }
+    }
+}
+
+grid_t grid_cleanup(grid_t g)
+{
+    cell_t cell;
+    uint8_t val;
+    for (int y = 0; y < 9; ++y) {
+        for (int x = 0; x < 9; ++x) {
+            grid_cell_copy(g, &cell, x, y);
+            val = cell[0];
+
+            // Remove possibilities
+            if (val > 0) {
+                grid_cell_remove_possibility(&g, x, y, val);
+            }
+        }
+    }
+
+    return g;
 }
 
 void grid_draw(grid_t grid)
@@ -72,7 +102,7 @@ void grid_draw(grid_t grid)
     cell_t cell;
     for (y = 0; y < 9; ++y) {
         for (x = 0; x < 9; ++x) {
-            grid_copy_cell(grid, &cell, x, y);
+            grid_cell_copy(grid, &cell, x, y);
 
             coord_x = GRID_MARGIN +
                 (CELL_WIDTH * x) + x;
