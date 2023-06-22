@@ -3,11 +3,27 @@
 #include "grid.h"
 #include "globals.h"
 
-#include <stdbool.h>
-
 int _idx_at(int x, int y)
 {
     return x + y * 9;
+}
+
+grid_t grid_load(char matrix[9*9])
+{
+    grid_t grid;
+    int val;
+    for (int i = 0; i < 81; ++i) {
+        val = matrix[i] - 48; // ASCII to DEC
+        if (val < 0 || val > 9) {
+            TraceLog(LOG_FATAL,
+                    "Invalid character %d at pos %d - %c",
+                    val, i, matrix[i]);
+        }
+
+        grid.matrix[i] = val;
+    }
+
+    return grid;
 }
 
 bool grid_is_busy(grid_t grid, int x, int y)
