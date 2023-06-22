@@ -1,13 +1,14 @@
 CC=clang
-CFLAGS=
-LIBS=
+CFLAGS=`pkg-config --cflags raylib`
+LIBS=`pkg-config --libs raylib`
 
 MKDIR=mkdir -p
 RM=rm -r
 
 SRCDIR=src
 BUILDDIR=build
-OBJS=$(BUILDDIR)/main.o
+OBJS=$(BUILDDIR)/main.o \
+	 $(BUILDDIR)/grid.o
 SOLVER=$(BUILDDIR)/solver
 
 all: $(SOLVER)
