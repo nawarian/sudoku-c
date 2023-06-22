@@ -5,20 +5,30 @@
 #include "grid.h"
 #include "globals.h"
 
-void _idx_to_x_y(int idx, int *x, int *y)
+void _idx_to_xy(int idx, int *x, int *y)
 {
     *y = (int) (idx / 9);
     *x = idx - (*y * 9);
+}
+
+uint8_t _xy_to_box(int x, int y)
+{
+    x = floor(x / 3);
+    y = floor(y / 3);
+
+    return (uint8_t) (x + (y * x));
 }
 
 void _draw_small_text(int x, int y, int number);
 
 void grid_set(grid_t *grid, int x, int y, uint8_t number)
 {
+    uint8_t bid = _xy_to_box(x, y);
+
     for (int i = 1; i < 10; ++i) {
         grid->col[x][y][i] = number > 0 ? 0 : 1;
         grid->row[y][x][i] = number > 0 ? 0 : 1;
-        // TODO: assign box
+        grid->box[bid][i] = number > 0 ? 0 : 1;
     }
 
     if (number > 0) {
@@ -28,7 +38,8 @@ void grid_set(grid_t *grid, int x, int y, uint8_t number)
         grid->row[y][x][0] = number;
         grid->row[y][x][number] = 1;
 
-        // TODO: assign box
+        grid->box[bid][0] = number;
+        grid->box[bid][number] = number;
     }
 }
 
@@ -45,7 +56,7 @@ grid_t grid_load(char matrix[9*9])
 
     grid_t grid = { 0 };
     for (int i = 0; i < 81; ++i) {
-        _idx_to_x_y(i, &x, &y);
+        _idx_to_xy(i, &x, &y);
         chr = matrix[i];
         val = chr - 48; // ASCII to DEC
 
@@ -64,6 +75,9 @@ grid_t grid_load(char matrix[9*9])
 
 void grid_cell_remove_possibility(grid_t *grid, int x, int y, uint8_t val)
 {
+    uint8_t bid = _xy_to_box(x, y);
+    grid->box[bid][val] = 0;
+
     for (int i = 0; i < 9; ++i) {
         if (i != y) {
             grid->row[i][x][val] = 0;
@@ -75,7 +89,7 @@ void grid_cell_remove_possibility(grid_t *grid, int x, int y, uint8_t val)
 grid_t grid_cleanup(grid_t g)
 {
     cell_t cell;
-    uint8_t val;
+    uint8_t val, bid;
     for (int y = 0; y < 9; ++y) {
         for (int x = 0; x < 9; ++x) {
             grid_cell_copy(g, &cell, x, y);

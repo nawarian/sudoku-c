@@ -9,7 +9,7 @@ typedef uint8_t cell_t[10];
 typedef struct grid_t {
     cell_t row[9][9];
     cell_t col[9][9];
-    cell_t box[9][9];
+    cell_t box[9];
 } grid_t;
 
 grid_t grid_load(char str[9*9]);
