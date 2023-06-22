@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include <raylib.h>
 
 #include "grid.h"
@@ -11,6 +12,30 @@ void _idx_to_x_y(int idx, int *x, int *y)
 }
 
 void _draw_small_text(int x, int y, int number);
+
+void grid_set(grid_t *grid, int x, int y, uint8_t number)
+{
+    for (int i = 1; i < 10; ++i) {
+        grid->col[x][y][i] = number > 0 ? 0 : 1;
+        grid->row[y][x][i] = number > 0 ? 0 : 1;
+        // TODO: assign box
+    }
+
+    if (number > 0) {
+        grid->col[x][y][0] = number;
+        grid->col[x][y][number] = 1;
+
+        grid->row[y][x][0] = number;
+        grid->row[y][x][number] = 1;
+
+        // TODO: assign box
+    }
+}
+
+void grid_copy_cell(grid_t grid, cell_t *dst, int x, int y)
+{
+    memcpy(dst, &grid.col[x][y], sizeof(cell_t));
+}
 
 grid_t grid_load(char matrix[9*9])
 {
@@ -30,17 +55,8 @@ grid_t grid_load(char matrix[9*9])
                     val, i, chr);
         }
 
-        for (int j = 1; j < 10; ++j) {
-            grid.matrix[x][y][j] = 0;
-            if (chr == '0') {
-                grid.matrix[x][y][j] = 1;
-            }
-        }
-
-        if (chr != '0') {
-            grid.matrix[x][y][0] = val;
-        }
-   }
+        grid_set(&grid, x, y, val > 0 ? val : 0);
+    }
 
     return grid;
 }
@@ -53,8 +69,11 @@ void grid_draw(grid_t grid)
     // Draw cells
     const char *buff;
     int coord_x, coord_y;
+    cell_t cell;
     for (y = 0; y < 9; ++y) {
         for (x = 0; x < 9; ++x) {
+            grid_copy_cell(grid, &cell, x, y);
+
             coord_x = GRID_MARGIN +
                 (CELL_WIDTH * x) + x;
             coord_y = GRID_MARGIN +
@@ -67,7 +86,7 @@ void grid_draw(grid_t grid)
                     CELL_HEIGHT + 2,
                     GRAY);
 
-            if (grid.matrix[x][y][0] > 0) {
+            if (cell[0] > 0) {
                 DrawRectangle(
                     coord_x + 1,
                     coord_y + 1,
@@ -75,7 +94,7 @@ void grid_draw(grid_t grid)
                     CELL_HEIGHT,
                     DARKGRAY);
 
-                buff = TextFormat("%d", grid.matrix[x][y][0]);
+                buff = TextFormat("%d", cell[0]);
                 DrawText(buff,
                         coord_x + (CELL_WIDTH / 2),
                         coord_y + (CELL_HEIGHT / 3),
@@ -84,7 +103,7 @@ void grid_draw(grid_t grid)
             } else {
                 // Draw subgrid
                 for (i = 1; i < 10; ++i) {
-                    if (grid.matrix[x][y][i] > 0) {
+                    if (cell[i] > 0) {
                         _draw_small_text(x, y, i);
                     }
                 }
@@ -92,7 +111,7 @@ void grid_draw(grid_t grid)
         }
     }
 
-    // Draw blocks
+    // Draw boxes
     for (y = 0; y < 3; ++y) {
         for (x = 0; x < 3; ++x) {
             DrawRectangleLines(
