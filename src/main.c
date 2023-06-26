@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "grid.h"
+#include "solver.h"
 #include "globals.h"
 
 int main(int argc, const char **argv)
@@ -20,6 +21,10 @@ int main(int argc, const char **argv)
 
     while(!WindowShouldClose()) {
         grid = grid_cleanup(grid);
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            grid = solver_pass(grid);
+        }
 
         ClearBackground(BLACK);
         BeginDrawing();
