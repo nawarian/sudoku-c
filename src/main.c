@@ -19,11 +19,16 @@ int main(int argc, const char **argv)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sudoku C");
     SetTargetFPS(60);
 
+    solver_pass_t res;
     while(!WindowShouldClose()) {
         grid = grid_cleanup(grid);
 
         if (IsKeyPressed(KEY_SPACE)) {
-            grid = solver_pass(grid);
+            res = solver_pass(grid);
+
+            if (res.applied) {
+                grid = res.result;
+            }
         }
 
         ClearBackground(BLACK);
@@ -31,6 +36,12 @@ int main(int argc, const char **argv)
             grid_draw(grid);
 
             DrawFPS(0, 0);
+            if (res.applied) {
+                DrawText(TextFormat("Strategy %s applied", solver_strategy_get(res.strategy)),
+                        0, SCREEN_HEIGHT - 20, 20, GREEN);
+            } else {
+                DrawText("No strategies applied.", 0, SCREEN_HEIGHT - 20, 20, RED);
+            }
         EndDrawing();
     }
 
