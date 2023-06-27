@@ -43,6 +43,16 @@ void grid_set(grid_t *grid, int x, int y, uint8_t number)
     }
 }
 
+uint8_t grid_cell_get(grid_t grid, int x, int y)
+{
+    return grid.row[y][x][0];
+}
+
+bool grid_can_set(grid_t grid, int x, int y, uint8_t value)
+{
+    return grid.row[y][x][value] == 1;
+}
+
 void grid_cell_copy(grid_t grid, cell_t *dst, int x, int y)
 {
     memcpy(dst, &grid.col[x][y], sizeof(cell_t));
@@ -82,6 +92,11 @@ void grid_cell_remove_possibility(grid_t *grid, int x, int y, uint8_t val)
         if (i != y) {
             grid->row[i][x][val] = 0;
             grid->col[x][i][val] = 0;
+        }
+
+        if (i != x) {
+            grid->row[y][i][val] = 0;
+            grid->col[i][y][val] = 0;
         }
     }
 }
