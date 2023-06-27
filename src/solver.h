@@ -6,7 +6,7 @@
 grid_t solver_pass(grid_t grid);
 
 typedef grid_t (*solver_function)(grid_t);
-grid_t solver_single_possibilities(grid_t grid);
+grid_t solver_naked_single(grid_t grid);
 
 #endif
 

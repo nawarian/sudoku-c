@@ -2,7 +2,7 @@
 #include "solver.h"
 
 solver_function solver_strategies[] = {
-    solver_single_possibilities,
+    solver_naked_single,
 };
 
 grid_t solver_pass(grid_t grid)
@@ -16,7 +16,7 @@ grid_t solver_pass(grid_t grid)
     return grid;
 }
 
-grid_t solver_single_possibilities(grid_t grid)
+grid_t solver_naked_single(grid_t grid)
 {
     cell_t *cell;
     for (int row = 0; row < 9; ++row) {
