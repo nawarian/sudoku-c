@@ -45,8 +45,8 @@ solver_pass_t solver_naked_single(grid_t grid)
     cell_t *cell;
     for (int row = 0; row < 9; ++row) {
         for (int col = 0; col < 9; ++col) {
-            uint8_t val = grid_cell_get(grid, col, row);
-            cell = &grid.row[row][col];
+            uint8_t val = grid.cell[row][col][0];
+            cell = &grid.cell[row][col];
 
             // If value is set, ignore
             if (val > 0) {
@@ -56,7 +56,7 @@ solver_pass_t solver_naked_single(grid_t grid)
             // How many possibilities this cell has
             int acc = 0;
             for (int i = 1; i < 10; ++i) {
-                if (grid.row[row][col][i] == 1) {
+                if (grid.cell[row][col][i] == 1) {
                     acc++;
                 }
             }
@@ -67,7 +67,7 @@ solver_pass_t solver_naked_single(grid_t grid)
             }
 
             for (int i = 1; i < 10; ++i) {
-                if (grid.row[row][col][i] == 1) {
+                if (grid.cell[row][col][i] == 1) {
                     grid_set(&grid, col, row, i);
                     res.applied = true;
                     res.result = grid;

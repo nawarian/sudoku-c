@@ -5,6 +5,8 @@
 #include "grid.h"
 #include "globals.h"
 
+#define _cell_cpy(grid, dst, x, y) memcpy(dst, &grid.cell[y][x], sizeof(cell_t));
+
 void _idx_to_xy(int idx, int *x, int *y)
 {
     *y = (int) (idx / 9);
@@ -26,36 +28,32 @@ void grid_set(grid_t *grid, int x, int y, uint8_t number)
     uint8_t bid = _xy_to_box(x, y);
 
     for (int i = 1; i < 10; ++i) {
-        grid->col[x][y][i] = number > 0 ? 0 : 1;
-        grid->row[y][x][i] = number > 0 ? 0 : 1;
-        grid->box[bid][i] = number > 0 ? 0 : 1;
+        grid->cell[y][x][i] = number > 0 ? 0 : 1;
     }
 
     if (number > 0) {
-        grid->col[x][y][0] = number;
-        grid->col[x][y][number] = 1;
-
-        grid->row[y][x][0] = number;
-        grid->row[y][x][number] = 1;
-
-        grid->box[bid][0] = number;
-        grid->box[bid][number] = number;
+        grid->cell[y][x][0] = number;
+        grid->cell[y][x][number] = 1;
     }
-}
-
-uint8_t grid_cell_get(grid_t grid, int x, int y)
-{
-    return grid.row[y][x][0];
 }
 
 bool grid_can_set(grid_t grid, int x, int y, uint8_t value)
 {
-    return grid.row[y][x][value] == 1;
-}
+    if (grid.cell[y][x][value] == 1) {
+        return true;
+    }
 
-void grid_cell_copy(grid_t grid, cell_t *dst, int x, int y)
-{
-    memcpy(dst, &grid.col[x][y], sizeof(cell_t));
+    int x0 = (int) (x / 3) * 3;
+    int y0 = (int) (y / 3) * 3;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            if (grid.cell[y0 + i][x0 + i][value] == 0) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 grid_t grid_load(char matrix[9*9])
@@ -82,21 +80,15 @@ grid_t grid_load(char matrix[9*9])
     return grid_cleanup(grid);
 }
 
-
 void grid_cell_remove_possibility(grid_t *grid, int x, int y, uint8_t val)
 {
-    uint8_t bid = _xy_to_box(x, y);
-    grid->box[bid][val] = 0;
-
     for (int i = 0; i < 9; ++i) {
         if (i != y) {
-            grid->row[i][x][val] = 0;
-            grid->col[x][i][val] = 0;
+            grid->cell[i][x][val] = 0;
         }
 
         if (i != x) {
-            grid->row[y][i][val] = 0;
-            grid->col[i][y][val] = 0;
+            grid->cell[y][i][val] = 0;
         }
     }
 }
@@ -107,7 +99,7 @@ grid_t grid_cleanup(grid_t g)
     uint8_t val, bid;
     for (int y = 0; y < 9; ++y) {
         for (int x = 0; x < 9; ++x) {
-            grid_cell_copy(g, &cell, x, y);
+            _cell_cpy(g, &cell, x, y);
             val = cell[0];
 
             // Remove possibilities
@@ -131,7 +123,7 @@ void grid_draw(grid_t grid)
     cell_t cell;
     for (y = 0; y < 9; ++y) {
         for (x = 0; x < 9; ++x) {
-            grid_cell_copy(grid, &cell, x, y);
+            _cell_cpy(grid, cell, x, y);
 
             coord_x = GRID_MARGIN +
                 (CELL_WIDTH * x) + x;
