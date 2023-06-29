@@ -4,12 +4,14 @@
 
 solver_function solver_strategies[] = {
     solver_naked_single,
+    solver_backtrack
 };
 
 const char* solver_strategy_get(int idx)
 {
     switch (idx) {
         case 0: return "Naked single";
+        case 1: return "Backtracking";
         default: return "Unknown";
     }
 }
@@ -77,5 +79,14 @@ solver_pass_t solver_naked_single(grid_t grid)
     }
 
     return res;
+}
+
+solver_pass_t solver_backtrack(grid_t grid)
+{
+    solver_pass_t pass;
+    pass.applied = false;
+    pass.result = grid;
+
+    return pass;
 }
 

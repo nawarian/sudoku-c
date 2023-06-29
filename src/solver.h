@@ -14,6 +14,7 @@ solver_pass_t solver_pass(grid_t grid);
 
 typedef solver_pass_t (*solver_function)(grid_t);
 solver_pass_t solver_naked_single(grid_t grid);
+solver_pass_t solver_backtrack(grid_t grid);
 const char* solver_strategy_get(int idx);
 
 #endif

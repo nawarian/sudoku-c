@@ -7,9 +7,10 @@ RM=rm -r
 
 SRCDIR=src
 BUILDDIR=build
-OBJS=$(BUILDDIR)/main.o \
-	 $(BUILDDIR)/grid.o \
+OBJS=$(BUILDDIR)/grid.o \
 	 $(BUILDDIR)/solver.o
+MAIN=$(BUILDDIR)/main.o
+TOBJS=$(BUILDDIR)/solver.test.o
 SOLVER=$(BUILDDIR)/solver
 
 SAMPLE_EASY_GRID="690805730518763020374192680007954312930217046421638900056381294040579168089406073"
@@ -21,12 +22,19 @@ all: $(SOLVER)
 run: $(SOLVER)
 	./$(SOLVER) $(SAMPLE_MEDIUM_GRID)
 
+test: $(BUILDDIR) $(OBJS) $(TOBJS)
+	for i in $(TOBJS); do \
+        $(CC) $(OBJS) $$i -o $(BUILDDIR)/test $(LIBS); \
+        ./$(BUILDDIR)/test; \
+        $(RM) $(BUILDDIR)/test; \
+    done
+
 .PHONY: clean
 clean:
 	$(RM) $(BUILDDIR)
 
-$(SOLVER): $(BUILDDIR) $(OBJS)
-	$(CC) $(OBJS) -o $(SOLVER) $(LIBS)
+$(SOLVER): $(BUILDDIR) $(OBJS) $(MAIN)
+	$(CC) $(OBJS) $(MAIN) -o $(SOLVER) $(LIBS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
